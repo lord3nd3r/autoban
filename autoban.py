@@ -1,59 +1,62 @@
 import hexchat
 import time
+import os
+import json
 
 __module_name__ = "MultiServerAutoBanScript"
-__module_version__ = "1.1"
-__module_description__ = "Automatically bans users who join/part back to back 3 times in 90 seconds across multiple servers."
+__module_version__ = "1.0"
+__module_description__ = "Automatically bans and unbans users based on specified criteria."
 
 # Configuration
-monitored_channels = ["#YOUR_CHANNEL_HERE_1", "#YOUR_CHANNEL_HERE_2"]  # Add more channels as needed
+monitored_channels = ["#YOUR_CHANNEL_HERE_1", "#YOUR_CHANNEL_HERE_2"]
 threshold_events = 3
-time_frame = 90  # In seconds
+time_frame = 90  # Seconds
+ban_duration = 3600  # Seconds (1 hour for example)
+ban_file_path = os.path.join(hexchat.get_info("configdir"), "addons", "autobans.json")
 
-# Global variable to track join/part events
-event_tracker = {}
+# Ensure the ban file exists
+if not os.path.exists(ban_file_path):
+    with open(ban_file_path, 'w') as f:
+        json.dump([], f)
 
-def update_tracker(nick, hostname, channel, server, event_type):
-    current_time = time.time()
-    key = (server, hostname, channel, event_type)
-    
-    if key not in event_tracker:
-        event_tracker[key] = []
-    
-    event_tracker[key].append(current_time)
-    
-    event_tracker[key] = [t for t in event_tracker[key] if current_time - t <= time_frame]
-    
-    if len(event_tracker[key]) >= threshold_events:
-        ban_user(hostname, channel, server)
+# Function to add a ban to the file
+def add_ban_to_file(hostname, channel, server, timestamp):
+    with open(ban_file_path, 'r+') as f:
+        bans = json.load(f)
+        bans.append({"hostname": hostname, "channel": channel, "server": server, "timestamp": timestamp})
+        f.seek(0)
+        json.dump(bans, f)
+        f.truncate()
 
+# Function to remove expired bans
+def remove_expired_bans():
+    with open(ban_file_path, 'r+') as f:
+        current_time = time.time()
+        bans = json.load(f)
+        updated_bans = [ban for ban in bans if current_time - ban["timestamp"] < ban_duration]
+        
+        # Unban process
+        for ban in bans:
+            if current_time - ban["timestamp"] >= ban_duration:
+                hexchat.command(f"QUOTE -s {ban['server']} MODE {ban['channel']} -b *!*@{ban['hostname']}")
+                print(f"Unbanned {ban['hostname']} on {ban['channel']} on server {ban['server']}.")
+        
+        f.seek(0)
+        json.dump(updated_bans, f)
+        f.truncate()
+
+# Modify existing functions to use add_ban_to_file and periodically call remove_expired_bans
+# For example, in ban_user function, after banning a user, call add_ban_to_file
+# Also, ensure to periodically call remove_expired_bans, possibly by using hexchat.hook_timer
+
+# Example modification to ban_user function
 def ban_user(hostname, channel, server):
-    # Ensure the command is executed in the correct server/channel context
+    timestamp = time.time()
     hexchat.command(f"QUOTE -s {server} MODE {channel} +b *!*@{hostname}")
     print(f"Banned {hostname} on {channel} on server {server} for frequent joins/parts.")
+    add_ban_to_file(hostname, channel, server, timestamp)
 
-def on_join(word, word_eol, userdata):
-    channel = hexchat.get_info("channel")
-    server = hexchat.get_info("host")
-    if len(word) > 3 and channel in monitored_channels:
-        nick = word[0]
-        hostname = word[3]  # Extract the hostname
-        update_tracker(nick, hostname, channel, server, "join")
+# Periodically check for expired bans to unban
+hexchat.hook_timer(ban_duration * 1000, lambda userdata: remove_expired_bans() or True)
 
-def on_part(word, word_eol, userdata):
-    channel = hexchat.get_info("channel")
-    server = hexchat.get_info("host")
-    if len(word) > 3 and channel in monitored_channels:
-        nick = word[0]
-        hostname = word[3]  # Extract the hostname
-        update_tracker(nick, hostname, channel, server, "part")
-
-def on_ping_timeout(word, word_eol, userdata):
-    # Placeholder for ping timeout logic. Adjust as necessary.
-    pass
-
-hexchat.hook_print("Join", on_join)
-hexchat.hook_print("Part", on_part)
-hexchat.hook_print("Ping Timeout", on_ping_timeout)
-
-print(f"{__module_name__} version {__module_version__} loaded.")
+# Make sure to include the rest of the previously provided script logic here
