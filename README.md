@@ -1,46 +1,48 @@
 AutoBanScript for HexChat
 
-AutoBanScript is a Python plugin for HexChat that automatically bans users who join and part (or experience ping timeouts) back to back 3 times within a 90-second window. This script is designed to help maintain channel integrity by mitigating potential spam or flood attacks.
+The MultiServerAutoBanScript is a Python plugin for HexChat designed to enhance channel management by automatically banning users who frequently join and part or experience ping timeouts within a short period across multiple servers. Additionally, this script stores bans in a file and automatically lifts these bans after a predetermined duration, promoting a balanced approach to moderation.
 Features
 
-    Monitors specific channels for join, part, and ping timeout events.
-    Bans users by hostname if they join and part 3 times within 90 seconds.
-    Configurable channel list and thresholds.
+    Monitors specified channels across multiple IRC servers for join, part, and ping timeout events.
+    Automatically bans users by hostname who meet the criteria (e.g., joining and parting 3 times within 90 seconds).
+    Stores ban details in a file for persistent tracking across HexChat sessions.
+    Automatically removes bans after a specified duration to prevent permanent penalties for temporary disruptions.
 
 Requirements
 
-    HexChat
-    Python 3.x installed and configured with HexChat
+    HexChat IRC client
+    Python 3.x plugin enabled within HexChat
 
 Installation
 
-    Ensure Python 3.x is installed on your system and the Python plugin is enabled in HexChat.
-    Download autoban.py to your HexChat addons directory.
+    Ensure Python 3.x is installed on your system and properly configured as a plugin in HexChat.
+    Download the MultiServerAutoBanScript.py file to your HexChat addons directory:
         Linux: ~/.config/hexchat/addons/
         Windows: %APPDATA%\HexChat\addons\
-    Restart HexChat or load the script manually via Window > Plugins and Scripts > Load... and select autoban.py.
+    Restart HexChat, or manually load the script through Window > Plugins and Scripts > Load... and navigate to the downloaded script.
 
 Configuration
 
-Edit autoban.py to adjust the script to your needs:
+Before using the script, you may need to adjust several settings to match your specific needs:
 
-    monitored_channels: List the channels you wish to monitor. For example, ["#channel1", "#channel2"].
-    threshold_events: The number of join/part events that trigger a ban (default is 3).
-    time_frame: The time window (in seconds) in which the join/part events are counted (default is 90 seconds).
+    Monitored Channels: Edit the monitored_channels list within the script to include the channels you wish to monitor.
+    Threshold Events and Time Frame: Set threshold_events and time_frame to control the sensitivity of the ban trigger.
+    Ban Duration: Adjust ban_duration to specify how long bans should last before being automatically removed.
 
 Usage
 
-Once installed and configured, the script runs automatically. It monitors the specified channels for join/part activity and bans users who meet the criteria set in the configuration.
+Once installed and configured, the script operates automatically in the background. It monitors for specified events in the configured channels and servers, applies bans as configured, and removes these bans after the set duration.
+Ban Management
+
+    Bans are stored in a JSON file located in the HexChat configuration directory under addons/autobans.json.
+    To manually manage bans or adjust the ban list, edit this file directly. Ensure HexChat is closed or reload the script after making changes to avoid conflicts.
+
 Uninstallation
 
-To uninstall the script, simply remove autoban.py from the HexChat addons directory and restart HexChat.
-
-
+Remove the MultiServerAutoBanScript.py file from the HexChat addons directory and restart HexChat to deactivate the script.
 Contributing
 
-Contributions to the script are welcome. Please feel free to fork the repository, make your changes, and submit a pull request.
-Support
+Contributions to the script are welcome. Please feel free to fork the project, make improvements, and submit pull requests with your changes.
 
-Disclaimer
 
-This script is provided "as is", without warranty of any kind. Use it at your own risk. The author is not responsible for any damages or issues that may arise from using this script.
+This script is provided "as is", without warranty of any kind. Use at your own risk. The authors are not responsible for any damages or disruptions caused by the use of this script.
