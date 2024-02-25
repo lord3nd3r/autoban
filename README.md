@@ -1,19 +1,46 @@
-AutoBanScript
-This script needs to be loaded into HexChat's Python plugin interface. Before using this script, ensure you have the Python plugin enabled in HexChat and Python installed on your system.
+AutoBanScript for HexChat
 
-This script does the following:
+AutoBanScript is a Python plugin for HexChat that automatically bans users who join and part (or experience ping timeouts) back to back 3 times within a 90-second window. This script is designed to help maintain channel integrity by mitigating potential spam or flood attacks.
+Features
 
-    Monitors specified channels for join, part, and ping timeout events.
-    Tracks these events by hostname.
-    If a user joins and parts (or has a ping timeout) 3 times within 90 seconds on any of the monitored channels, their hostname is banned from those channels.
+    Monitors specific channels for join, part, and ping timeout events.
+    Bans users by hostname if they join and part 3 times within 90 seconds.
+    Configurable channel list and thresholds.
 
-Please replace YOUR_CHANNELS_HERE with the actual channels you want to monitor, separated by commas.
+Requirements
 
-Important Notes:
+    HexChat
+    Python 3.x installed and configured with HexChat
 
-    This script uses a global dictionary event_tracker to track the join/part events and ping timeouts by hostname and channel.
-    It assumes that the hostname is available in the join, part, and ping timeout events. You may need to adjust how the hostname is obtained depending on the specific HexChat event payload.
-    For ping timeout handling, the script currently lacks a direct way to know which channel the ping timeout event occurred in because HexChat's event for ping timeouts might not provide channel information. This script attempts to apply the ping timeout check across all monitored channels, which may not be perfectly accurate in all cases.
-    Make sure to test this script in a controlled environment before using it in live channels to ensure it behaves as expected and doesn't accidentally ban innocent users.
-    Replace YOUR_CHANNEL_HERE_1, YOUR_CHANNEL_HERE_2, etc., with the actual channel names you want to monitor.
-    
+Installation
+
+    Ensure Python 3.x is installed on your system and the Python plugin is enabled in HexChat.
+    Download autoban.py to your HexChat addons directory.
+        Linux: ~/.config/hexchat/addons/
+        Windows: %APPDATA%\HexChat\addons\
+    Restart HexChat or load the script manually via Window > Plugins and Scripts > Load... and select autoban.py.
+
+Configuration
+
+Edit autoban.py to adjust the script to your needs:
+
+    monitored_channels: List the channels you wish to monitor. For example, ["#channel1", "#channel2"].
+    threshold_events: The number of join/part events that trigger a ban (default is 3).
+    time_frame: The time window (in seconds) in which the join/part events are counted (default is 90 seconds).
+
+Usage
+
+Once installed and configured, the script runs automatically. It monitors the specified channels for join/part activity and bans users who meet the criteria set in the configuration.
+Uninstallation
+
+To uninstall the script, simply remove autoban.py from the HexChat addons directory and restart HexChat.
+
+
+Contributing
+
+Contributions to the script are welcome. Please feel free to fork the repository, make your changes, and submit a pull request.
+Support
+
+Disclaimer
+
+This script is provided "as is", without warranty of any kind. Use it at your own risk. The author is not responsible for any damages or issues that may arise from using this script.
